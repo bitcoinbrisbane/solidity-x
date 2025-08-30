@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-
 func main() {
     inputPath := "contracts/ERC20.xol"
     outputPath := "dist/ERC20.sol"

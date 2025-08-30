@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+func TranspileFind(src string) string {
+	return src
+}
+
 // TranspileSwitchToIfElse replaces switch statements with if-else chains
 func TranspileSwitchToIfElse(src string) string {
 	switchRe := regexp.MustCompile(`(?m)([ \t]*)switch\s*\(([^)]*)\)\s*{([\s\S]*?)(^[ \t]*})`)
