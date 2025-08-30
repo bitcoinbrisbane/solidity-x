@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ArrayContract {
+
+    uint[] private myCollection;
+
+    constructor() {
+        // Constructor logic
+    }
+
+    function find(uint target) public pure returns (int) {
+        uint result = myCollection.find(target);
+        return result;
+    }
+}
