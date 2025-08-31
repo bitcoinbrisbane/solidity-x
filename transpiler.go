@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-func TranspileFind(src string) string {
-	return src
-}
+// func TranspileFind(src string) string {
+// 	findRe := regexp.MustCompile(`(?m)([ \t]*)find\s*\(([^)]*)\)\s*{([\s\S]*?)(^[ \t]*})`)
+// 	return src
+// }
 
 // TranspileSwitchToIfElse replaces switch statements with if-else chains
 func TranspileSwitchToIfElse(src string) string {

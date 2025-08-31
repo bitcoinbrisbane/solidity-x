@@ -6,6 +6,4 @@ contract RecordContract {
     constructor() {
         // Constructor logic
     }
-
-
 }
