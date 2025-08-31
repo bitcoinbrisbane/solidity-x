@@ -56,10 +56,10 @@ contract ERC20 is IERC20 {
         _approve(sender, msg.sender, currentAllowance - amount);
 
         if (sender == address(0)) {
-        	// Do something
-        	_transfer(sender, recipient, 0);
+            // Do something
+            _transfer(sender, recipient, 0);
         } else {
-        	_transfer(sender, recipient, amount);
+		    _transfer(sender, recipient, amount);
         }
 
         return true;

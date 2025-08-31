@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"solidty-x/transpiler"
 )
 
 func main() {
@@ -30,7 +32,7 @@ func main() {
     }
 
     // Transpile switch to if-else
-    out := TranspileSwitchToIfElse(src.String())
+    out := transpiler.TranspileSwitchToIfElse(src.String())
 
     // Write to output .sol file
     err = os.WriteFile(outputPath, []byte(out), 0644)
