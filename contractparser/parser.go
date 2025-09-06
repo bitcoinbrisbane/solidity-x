@@ -1,11 +1,20 @@
 package contractparser
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+type Statements struct {
+	Lines []string
+}
 
 type FunctionInfo struct {
-	Name      string
-	StartLine int
-	EndLine   int
+	Name       string
+	StartLine  int
+	EndLine    int
+	Visibility string
+	// Args       []string
 }
 
 type GlobalVarInfo struct {
@@ -16,9 +25,11 @@ type GlobalVarInfo struct {
 }
 
 type ContractLayout struct {
-	Functions   []FunctionInfo
-	GlobalVars  []GlobalVarInfo
+	Functions  []FunctionInfo
+	GlobalVars []GlobalVarInfo
 }
+
+const FUNCTION_REGEX = `function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:(public|private|internal|external)\s+)?(?:(?:pure|view|payable|nonpayable)\s+)?(?:returns\s*\([^)]*\)\s*)?(?:override\s+)?(?:virtual\s+)?\{`
 
 // ParseContractLayout scans each line and records start/end lines of functions and global vars
 func ParseContractLayout(lines []string) ContractLayout {
@@ -26,32 +37,36 @@ func ParseContractLayout(lines []string) ContractLayout {
 	inFunc := false
 	funcStart := 0
 	funcName := ""
+	visibility := ""
 	braceCount := 0
+	const functionLength = 8
 
 	for i, line := range lines {
 		trim := strings.TrimLeft(line, " \t")
-		if !inFunc && len(trim) > 8 && trim[:8] == "function" {
+		if !inFunc && len(trim) > functionLength && trim[:functionLength] == "function" {
 			inFunc = true
 			funcStart = i
 			braceCount = 0
-			// Extract function name
-			name := ""
-			for j := 8; j < len(trim); j++ {
-				if trim[j] == ' ' || trim[j] == '(' {
-					name = trim[8:j]
-					break
-				}
+			// Extract function name and visibility using regex
+			funcNameRegex := regexp.MustCompile(FUNCTION_REGEX)
+			matches := funcNameRegex.FindStringSubmatch(trim)
+			if len(matches) > 1 {
+				funcName = matches[1]
 			}
-			funcName = name
+			visibility = "internal" // default visibility
+			if len(matches) > 2 && matches[2] != "" {
+				visibility = matches[2]
+			}
 		}
 		if inFunc {
 			braceCount += countChar(line, '{')
 			braceCount -= countChar(line, '}')
 			if braceCount == 0 {
 				layout.Functions = append(layout.Functions, FunctionInfo{
-					Name:      funcName,
-					StartLine: funcStart,
-					EndLine:   i,
+					Name:       funcName,
+					StartLine:  funcStart,
+					EndLine:    i,
+					Visibility: visibility,
 				})
 				inFunc = false
 			}

@@ -32,11 +32,11 @@ func TestParseContractLayout(t *testing.T) {
 	layout := ParseContractLayout(lines)
 
 	expectedFuncs := []FunctionInfo{
-		{"foo", 2, 4},
-		{"bar", 5, 7},
+		{"greet", 9, 11, "public"},
+		{"setGreeting", 14, 16, "public"},
 	}
 	expectedVars := []GlobalVarInfo{
-		{"myCollection", "uint[]", 1, 1},
+		{"greeting", "string", 1, 1},
 	}
 
 	if !reflect.DeepEqual(layout.Functions, expectedFuncs) {
