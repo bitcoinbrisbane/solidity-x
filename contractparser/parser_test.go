@@ -6,15 +6,25 @@ import (
 )
 
 func TestParseContractLayout(t *testing.T) {
-	src := `contract FindExample {
-    uint[] private myCollection;
-    function foo(uint x) public pure returns (int) {
-        return 1;
+	src := `contract Greeter {
+    string private greeting; // State variable to store the greeting message
+
+    // Constructor: executed only once when the contract is deployed
+    constructor(string memory _initialGreeting) {
+        greeting = _initialGreeting;
     }
-    function bar() public {
-        // do nothing
+
+    // Function to retrieve the current greeting
+    function greet() public view returns (string memory) {
+        return greeting;
+    }
+
+    // Function to update the greeting message
+    function setGreeting(string memory _newGreeting) public {
+        greeting = _newGreeting;
     }
 }`
+
 	lines := make([]string, 0)
 	for _, line := range splitLines(src) {
 		lines = append(lines, line)
