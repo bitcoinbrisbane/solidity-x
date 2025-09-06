@@ -30,6 +30,7 @@ type ContractLayout struct {
 }
 
 const FUNCTION_REGEX = `function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:(public|private|internal|external)\s+)?(?:(?:pure|view|payable|nonpayable)\s+)?(?:returns\s*\([^)]*\)\s*)?(?:override\s+)?(?:virtual\s+)?\{`
+const GLOBAL_VAR_REGEX = `^\s*(?:(?:uint(?:\d+)?|int(?:\d+)?|bool|address|string|bytes(?:\d+)?|mapping\s*\([^)]+\)|[a-zA-Z_][a-zA-Z0-9_]*(?:\[\])*)\s+)(?:(public|private|internal)\s+)?(?:(constant|immutable)\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:=\s*[^;]+)?\s*;`
 
 // ParseContractLayout scans each line and records start/end lines of functions and global vars
 func ParseContractLayout(lines []string) ContractLayout {
@@ -71,14 +72,20 @@ func ParseContractLayout(lines []string) ContractLayout {
 				inFunc = false
 			}
 		}
-		// Simple global var detection (not in function, ends with ';')
-		if !inFunc && len(trim) > 0 && trim[len(trim)-1] == ';' && (containsType(trim)) {
-			layout.GlobalVars = append(layout.GlobalVars, GlobalVarInfo{
-				Name:      extractVarName(trim),
-				Type:      extractVarType(trim),
-				StartLine: i,
-				EndLine:   i,
-			})
+		// Global var detection using regex
+		if !inFunc {
+			globalVarRegex := regexp.MustCompile(GLOBAL_VAR_REGEX)
+			matches := globalVarRegex.FindStringSubmatch(line)
+			if len(matches) > 3 {
+				varType := strings.TrimSpace(matches[0][:strings.LastIndex(matches[0], matches[3])])
+				varType = strings.Fields(varType)[0] // Get first word as type
+				layout.GlobalVars = append(layout.GlobalVars, GlobalVarInfo{
+					Name:      matches[3],
+					Type:      varType,
+					StartLine: i,
+					EndLine:   i,
+				})
+			}
 		}
 	}
 	return layout
@@ -92,33 +99,4 @@ func countChar(s string, c byte) int {
 		}
 	}
 	return count
-}
-
-// Dummy helpers for type/var extraction (improve as needed)
-func containsType(line string) bool {
-	return (len(line) > 3 && (line[:3] == "int" || line[:4] == "uint"))
-}
-
-func extractVarName(line string) string {
-	// crude: last word before ;
-	parts := []rune(line)
-	end := len(parts) - 1
-	for end > 0 && (parts[end] == ';' || parts[end] == ' ') {
-		end--
-	}
-	start := end
-	for start > 0 && parts[start] != ' ' {
-		start--
-	}
-	return string(parts[start+1 : end+1])
-}
-
-func extractVarType(line string) string {
-	// crude: first word
-	for i := 0; i < len(line); i++ {
-		if line[i] == ' ' {
-			return line[:i]
-		}
-	}
-	return line
 }
